@@ -11,6 +11,7 @@ import Reg from './ridgeReg.mjs';
 import ridgeRegWeighted from './ridgeWeightedReg.mjs';
 import ridgeRegThreaded from './ridgeRegThreaded.mjs';
 import util from './util.mjs';
+import BlinkDetector from './blinkDetector.js'; // Import BlinkDetector
 
 const webgazer = {};
 webgazer.tracker = {};
@@ -33,6 +34,23 @@ var faceFeedbackBox = null;
 var gazeDot = null;
 // Why is this not in webgazer.params ?
 var debugVideoLoc = '';
+
+// Blink detection setup
+const blinkDetector = new BlinkDetector();
+
+async function setup() {
+  await blinkDetector.loadModels();
+  navigator.mediaDevices.getUserMedia({ video: {} }).then(stream => {
+    videoElement.srcObject = stream;
+  });
+}
+
+async function loop() {
+  await blinkDetector.detectBlinks(videoElement);
+  requestAnimationFrame(loop);
+}
+
+setup().then(loop);
 
 /*
  * Initialises variables used to store accuracy eigenValues
